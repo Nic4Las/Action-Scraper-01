@@ -11,7 +11,9 @@ import json
 import os
 
 OUTPUT_DIR = "outputs"
-MAX_PAGE = 100
+MAX_PAGE = 1000
+CHUNK_SIZE = 250
+INDEX_CHUNK_SIZE = 25000
 
 def setup_logging(path='logger_config.json'):
     with open(path, 'rt') as f:
@@ -45,9 +47,21 @@ if __name__ == "__main__":
     df = pd.DataFrame([novel.dict() for novel in novels])
 
     # make sure the output directory exists
-    os.makedirs(OUTPUT_DIR, exist_ok=True)
 
-    fileName = f"scrape_{pd.Timestamp.now().strftime('%Y%m%d_%H%M%S')}.csv"
-    outPath = os.path.join(OUTPUT_DIR, fileName)
-    df.to_csv(outPath, index=False)
+
+    time = pd.Timestamp.now().strftime('%Y%m%d_%H%M%S')
+    db_folder = os.path.join(OUTPUT_DIR, time)
+
+    os.makedirs(db_folder, exist_ok=True)
+
+    # create cunks of CHUNK_SIZE rows and writhe them to json files
+    for i, chunk in enumerate(df.groupby(df.index // CHUNK_SIZE)):
+        outPath = os.path.join(db_folder, f"scrape_{time}_chunk_{i}")
+        chunk[1].to_json(f"{outPath}.json", orient="records")
     
+    # dropt the description column and create several index files that contain the index of the json files
+    for i, chunk in enumerate(df.groupby(df.index // INDEX_CHUNK_SIZE)):
+        outPath = os.path.join(db_folder, f"index_{i}")
+        chunkDF = chunk[1].drop(columns=["description"])
+        chunkDF["file"] = [f"scrape_{time}_chunk_{i}.json" for i in range(len(chunkDF))]
+        chunkDF.to_json(f"{outPath}.json", orient="records")
