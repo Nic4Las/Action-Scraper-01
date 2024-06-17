@@ -6,12 +6,12 @@ on:
   #   - cron: '0 0 * * 1' # At 00:00 on Monday
 
 jobs:
-  build:
+  scrape:
     runs-on: ubuntu-latest
     steps:
 
       - name: checkout repo content
-        uses: actions/checkout@v2 # checkout the repository content to github runner
+        uses: actions/checkout@v5 # checkout the repository content to github runner
 
       - name: setup python
         uses: actions/setup-python@v5
@@ -32,9 +32,9 @@ jobs:
       - name: Check outputs directory
         run: ls -l outputs
           
-     - name: Deploy to GitHub Pages
+      - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./outputs
-          force: true
+          force_orphan: true
