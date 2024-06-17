@@ -28,17 +28,13 @@ jobs:
         # env:
         #   SOME_SECRET: ${{ secrets.SOME_SECRET }}
         run: python main.py
+
+      - name: Check outputs directory
+        run: ls -l outputs
           
-      - name: Deploy to GitHub Pages
-        run: |
-          git config --global user.name 'github-actions[bot]'
-          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-          git fetch origin
-          git checkout -b gh-pages origin/gh-pages || git checkout --orphan gh-pages
-          rm -rf ./*
-          cp -r outputs/* .
-          git add --all
-          git commit -m 'Update GitHub Pages with scraping results'
-          git push origin gh-pages --force
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+     - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./outputs
+          force: true

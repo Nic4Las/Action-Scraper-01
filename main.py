@@ -11,7 +11,7 @@ import json
 import os
 
 OUTPUT_DIR = "outputs"
-MAX_PAGE = 250
+MAX_PAGE = 100
 CHUNK_SIZE = 250
 INDEX_CHUNK_SIZE = 25000
 
